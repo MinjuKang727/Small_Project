@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Page Counter</title>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --success-color: #2ECC71;
+            --bg-color: #F5F7FA;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        h1 { font-size: 1.5rem; margin-bottom: 8px; font-weight: 700; }
+        p.subtitle { color: #888; margin-bottom: 30px; font-size: 0.95rem; }
+
+        /* 드래그 앤 드롭 영역 */
+        #drop-zone {
+            border: 2px dashed #D1D5DB;
+            border-radius: 16px;
+            padding: 40px 20px;
+            transition: all 0.3s ease;
+            background: #FAFBFC;
+            cursor: pointer;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        #drop-zone.dragover {
+            border-color: var(--primary-color);
+            background-color: #EDF5FF;
+            transform: scale(1.02);
+        }
+
+        .icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+        
+        .result-card {
+            background: #F8FAFC;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none; /* 결과 발생 전까지 숨김 */
+        }
+
+        .total-pages {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .file-info { font-size: 0.9rem; color: #666; }
+
+        .btn-reset {
+            margin-top: 20px;
+            background: none;
+            border: none;
+            color: #999;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        /* 로딩 애니메이션 */
+        .spinner {
+            display: none;
+            margin: 20px auto;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0,0,0,0.1);
+            border-left-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>PDF Page Counter</h1>
+    <p class="subtitle">온라인으로 제본 맡길 때, 일일이 페이지 세기 힘드셨죠?<br><b>PDF Page Counter</b>로 편하게 PDF 장 수를 세어보세요.</p>
+
+    <div id="drop-zone" onclick="document.getElementById('fileInput').click()">
+        <span class="icon">📂</span>
+        <p>파일을 여기에 드롭하거나 클릭하여 선택<br>(다중 선택 가능)</p>
+        <input type="file" id="fileInput" multiple accept=".pdf" style="display:none" onchange="processFiles(this.files)">
+    </div>
+
+    <div id="loader" class="spinner"></div>
+
+    <div id="result-card" class="result-card">
+        <div class="file-info" id="file-count">총 0개의 파일</div>
+        <div class="total-pages" id="total-pages">0</div>
+        <div style="font-weight: 600;">Total Pages</div>
+        <button class="btn-reset" onclick="resetAll()">다시 시작하기</button>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const resultCard = document.getElementById('result-card');
+    const totalPagesEl = document.getElementById('total-pages');
+    const fileCountEl = document.getElementById('file-count');
+    const loader = document.getElementById('loader');
+
+    // 드래그 이벤트 방지 및 스타일 제어
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    // 드롭 시 파일 처리
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        processFiles(files);
+    });
+
+    async function processFiles(files) {
+        const pdfFiles = Array.from(files).filter(file => file.name.toLowerCase().endsWith('.pdf'));
+        
+        if (pdfFiles.length === 0) {
+            alert("PDF 파일이 없습니다.");
+            return;
+        }
+
+        // 초기화 및 로딩 표시
+        dropZone.style.display = 'none';
+        resultCard.style.display = 'none';
+        loader.style.display = 'block';
+
+        let totalPageCount = 0;
+        let successCount = 0;
+
+        for (const file of pdfFiles) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+                totalPageCount += pdfDoc.getPageCount();
+                successCount++;
+            } catch (err) {
+                console.error("파일 로드 실패:", file.name);
+            }
+        }
+
+        // 결과 업데이트
+        loader.style.display = 'none';
+        resultCard.style.display = 'block';
+        fileCountEl.textContent = `총 ${successCount}개의 PDF 파일`;
+        totalPagesEl.textContent = totalPageCount.toLocaleString();
+    }
+
+    function resetAll() {
+        dropZone.style.display = 'block';
+        resultCard.style.display = 'none';
+        document.getElementById('fileInput').value = '';
+    }
+</script>
+
+</body>
+</html>
