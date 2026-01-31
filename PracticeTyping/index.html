@@ -4,88 +4,70 @@
     <meta charset="UTF-8">
     <title>Dynamic Typing Master</title>
     <style>
-        :root { --primary: #4a90e2; --bg: #f0f2f5; --text: #333; }
-        body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; color: var(--text); }
-        .container { max-width: 700px; width: 100%; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center; }
+        :root { --primary: #4a90e2; --bg: #f5f7fa; --text: #333; }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { max-width: 800px; width: 100%; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary); text-align: center; margin-bottom: 10px; }
+        p.desc { text-align: center; color: #888; margin-bottom: 30px; }
         
-        h1 { color: var(--primary); font-size: 2rem; margin-bottom: 5px; }
-        .desc { color: #888; margin-bottom: 30px; font-size: 0.95rem; }
+        /* 파일 선택 리스트 */
+        #file-list { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; min-height: 40px; }
+        .file-btn { padding: 8px 18px; border: 2px solid var(--primary); background: white; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; font-weight: 600; color: var(--primary); }
+        .file-btn:hover { background: #eef5ff; transform: translateY(-2px); }
+        .file-btn.active { background: var(--primary); color: white; }
 
-        /* 드롭다운 스타일 */
-        .select-wrapper { margin-bottom: 30px; }
-        #file-selector { 
-            width: 100%; max-width: 300px; padding: 12px 15px; border: 2px solid #ddd; border-radius: 10px; 
-            font-size: 1rem; outline: none; transition: 0.3s; cursor: pointer; background: #fff;
-        }
-        #file-selector:focus { border-color: var(--primary); box-shadow: 0 0 8px rgba(74, 144, 226, 0.2); }
+        /* 타자 영역 */
+        .typing-area { background: #f9f9f9; padding: 25px; border-radius: 12px; margin-bottom: 20px; }
+        #display-text { font-size: 1.4rem; line-height: 1.6; margin-bottom: 15px; min-height: 1.4rem; color: #444; word-break: keep-all; }
+        #input-field { width: 100%; padding: 15px; font-size: 1.2rem; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        #input-field:focus { border-color: var(--primary); background: white; }
 
-        /* 연습 영역 */
-        .typing-box { background: #f8f9fa; border-radius: 15px; padding: 30px; margin-bottom: 25px; border: 1px solid #eee; }
-        #display-text { font-size: 1.5rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5; color: #222; min-height: 1.5rem; word-break: keep-all; }
-        #input-field { 
-            width: 100%; padding: 15px; font-size: 1.2rem; border: 2px solid #eee; border-radius: 10px; 
-            box-sizing: border-box; outline: none; transition: 0.3s; text-align: center;
-        }
-        #input-field:focus { background: white; border-color: var(--primary); }
-        #input-field:disabled { background: #eee; cursor: not-allowed; }
-
-        /* 통계 섹션 */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .stat-card { background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; }
-        .stat-label { font-size: 0.8rem; color: #999; display: block; margin-bottom: 5px; }
-        .stat-value { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
-
-        /* 결과 모달 */
-        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index: 9; backdrop-filter: blur(4px); }
-        #result-modal { 
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            background: white; padding: 40px; border-radius: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); 
-            text-align: center; z-index: 10; width: 320px; 
-        }
-        .score-circle { width: 100px; height: 100px; border-radius: 50%; border: 5px solid var(--primary); display: flex; align-items: center; justify-content: center; margin: 20px auto; font-size: 1.8rem; font-weight: bold; color: var(--primary); }
-        .btn-restart { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-restart:hover { opacity: 0.9; transform: scale(1.05); }
+        /* 하단 정보 */
+        .stats { display: flex; justify-content: space-between; padding: 0 10px; font-weight: bold; color: #666; font-size: 0.9rem; }
+        .stats span b { color: var(--primary); font-size: 1.1rem; }
+        
+        /* 결과창 */
+        #result-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.2); text-align: center; z-index: 10; width: 300px; }
+        .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 9; }
+        .reset-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>⌨️ Typing Master</h1>
-    <p class="desc">연습할 파일을 선택하고 타이핑을 시작하세요.</p>
+    <p class="desc">연습할 파일을 선택하고 Enter를 치며 진행하세요!</p>
+    
+    <div id="file-list">파일을 불러오는 중...</div>
 
-    <div class="select-wrapper">
-        <select id="file-selector">
-            <option value="" disabled selected>연습할 파일을 선택하세요</option>
-            </select>
+    <div class="typing-area">
+        <div id="display-text">파일을 먼저 선택해 주세요.</div>
+        <input type="text" id="input-field" placeholder="파일 선택 시 활성화됩니다." disabled autocomplete="off">
     </div>
 
-    <div class="typing-box">
-        <div id="display-text">파일을 선택하면 문장이 나타납니다.</div>
-        <input type="text" id="input-field" placeholder="입력 후 Enter를 누르세요" disabled autocomplete="off">
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card"><span class="stat-label">진행도</span><span class="stat-value" id="progress">0</span><span class="stat-value">%</span></div>
-        <div class="stat-card"><span class="stat-label">오타</span><span class="stat-value" id="errors">0</span></div>
-        <div class="stat-card"><span class="stat-label">타수</span><span class="stat-value" id="wpm">0</span></div>
+    <div class="stats">
+        <span>진행: <b id="progress">0</b>%</span>
+        <span>오타: <b id="errors">0</b></span>
+        <span>속도: <b id="wpm">0</b> 타</span>
     </div>
 </div>
 
 <div class="overlay" id="overlay"></div>
 <div id="result-modal">
-    <h2 style="margin-top:0">🎉 연습 종료!</h2>
-    <div class="score-circle" id="final-score-circle">0</div>
-    <div id="final-stats" style="margin-bottom: 20px; color: #666; line-height: 1.6;"></div>
-    <button class="btn-restart" onclick="location.reload()">다시 하기</button>
+    <h2>🎉 결과 리포트</h2>
+    <div id="final-stats"></div>
+    <button class="reset-btn" onclick="location.reload()">다시 하기</button>
 </div>
 
 <script>
-    /** [설정] 본인의 정보로 변경 **/
-    const GITHUB_USERNAME = "MinjuKang727"; // 실제 아이디로 수정하세요
-    const REPO_NAME = "CodingWithGemini";   // 실제 저장소 이름으로 수정하세요
+    /**
+     * [설정] 본인의 정보로 변경하세요!
+     */
+    const GITHUB_USERNAME = "MinjuKang727"; // 예: "minjukang727"
+    const REPO_NAME = "CodingWithGemini";      // 예: "my-typing-practice"
     const DATA_FOLDER = "PracticeTyping/data";
 
-    const fileSelector = document.getElementById('file-selector');
+    const fileListContainer = document.getElementById('file-list');
     const displayText = document.getElementById('display-text');
     const inputField = document.getElementById('input-field');
     
@@ -95,46 +77,58 @@
     let totalChars = 0;
     let startTime;
 
-    // 1. 드롭다운 목록 채우기 (GitHub API)
-    async function fetchFiles() {
+    // 1. GitHub API를 통해 data 폴더의 파일 목록을 동적으로 가져오기
+    async function fetchFileList() {
         const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${DATA_FOLDER}`;
+        
         try {
-            const res = await fetch(url);
-            const data = await res.json();
-            data.filter(f => f.name.endsWith('.txt')).forEach(file => {
-                const opt = document.createElement('option');
-                opt.value = file.download_url;
-                opt.textContent = file.name.replace('.txt', '');
-                fileSelector.appendChild(opt);
+            const response = await fetch(url);
+            const files = await response.json();
+            
+            fileListContainer.innerHTML = ""; // 로딩 문구 제거
+
+            // 확장자가 .txt인 파일만 필터링해서 버튼 생성
+            files.filter(file => file.name.endsWith('.txt')).forEach(file => {
+                const btn = document.createElement('button');
+                btn.className = 'file-btn';
+                // 파일명에서 .txt 제외하고 표시
+                btn.innerText = file.name.replace('.txt', '');
+                btn.onclick = () => loadFileData(file.download_url, btn);
+                fileListContainer.appendChild(btn);
             });
-        } catch (e) {
-            console.error("파일 로딩 실패:", e);
-            displayText.innerText = "파일 목록을 불러오지 못했습니다.";
+        } catch (err) {
+            fileListContainer.innerText = "파일 목록을 불러오지 못했습니다. (설정 확인 필요)";
+            console.error(err);
         }
     }
 
-    // 2. 드롭다운 선택 시 이벤트
-    fileSelector.onchange = async (e) => {
-        const url = e.target.value;
+    // 2. 선택한 파일의 내용을 읽어오기
+    async function loadFileData(url, btn) {
         try {
-            const res = await fetch(url);
-            const text = await res.text();
+            const response = await fetch(url);
+            const text = await response.text();
             sentences = text.split('\n').map(s => s.trim()).filter(s => s.length > 0);
             
-            // 초기화 및 시작
-            currentIdx = 0;
-            totalErrors = 0;
-            totalChars = 0;
-            startTime = null;
-            inputField.disabled = false;
-            inputField.value = "";
-            inputField.focus();
-            updateStats();
-            showSentence();
+            document.querySelectorAll('.file-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            initGame();
         } catch (err) {
-            alert("파일을 불러올 수 없습니다.");
+            alert('파일 내용을 읽는 데 실패했습니다.');
         }
-    };
+    }
+
+    function initGame() {
+        currentIdx = 0;
+        totalErrors = 0;
+        totalChars = 0;
+        inputField.disabled = false;
+        inputField.value = "";
+        inputField.focus();
+        startTime = null; // 첫 타자 시 시작
+        updateStats();
+        showSentence();
+    }
 
     function showSentence() {
         if (currentIdx < sentences.length) {
@@ -145,42 +139,64 @@
         }
     }
 
-    inputField.oninput = () => { if(!startTime) startTime = Date.now(); };
+    inputField.addEventListener('input', () => {
+        if (!startTime) startTime = Date.now();
+    });
 
-    inputField.onkeypress = (e) => {
+    inputField.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const val = inputField.value;
             const target = sentences[currentIdx];
-            let errCount = 0;
+
+            // 오타 검사 (글자별 비교)
+            let errors = 0;
             const maxLen = Math.max(val.length, target.length);
-            for(let i=0; i < maxLen; i++) if(val[i] !== target[i]) errCount++;
+            for(let i=0; i < maxLen; i++) {
+                if(val[i] !== target[i]) errors++;
+            }
             
-            totalErrors += errCount;
-            totalChars += target.length;
-            
+            totalErrors += errors;
+            totalChars += target.length; // 기준 글자수 누적
+
+            // 속도 계산 (WPM/타수)
             const elapsedMin = (Date.now() - startTime) / 60000;
-            document.getElementById('wpm').innerText = Math.floor(totalChars / (elapsedMin || 1));
+            const currentWpm = Math.floor(totalChars / (elapsedMin || 1));
+            
+            document.getElementById('wpm').innerText = currentWpm;
             document.getElementById('errors').innerText = totalErrors;
 
             currentIdx++;
             inputField.value = "";
             showSentence();
         }
-    };
+    });
 
     function updateStats() {
-        document.getElementById('progress').innerText = "0";
-        document.getElementById('errors').innerText = "0";
-        document.getElementById('wpm').innerText = "0";
+        document.getElementById('progress').innerText = 0;
+        document.getElementById('errors').innerText = 0;
+        document.getElementById('wpm').innerText = 0;
     }
 
     function finishGame() {
         inputField.disabled = true;
         const accuracy = Math.max(0, 100 - (totalErrors / totalChars * 100)).toFixed(1);
+        
+        // 총점 100점 만점 계산
         const finalScore = Math.max(0, Math.floor(accuracy));
 
-        document.getElementById('final-score-circle').innerText = finalScore;
         document.getElementById('final-stats').innerHTML = `
-            평균 속도: <b>${document.getElementById('wpm').innerText}</b> 타<br>
-            정확도: <b>${accuracy}%</b><br>
-            총 오타: <b>${totalErrors
+            <p style="font-size:1.2rem">속도: <b>${document.getElementById('wpm').innerText}</b> 타</p>
+            <p>정확도: <b>${accuracy}%</b></p>
+            <hr>
+            <h1 style="color:var(--primary)">${finalScore} / 100점</h1>
+        `;
+        document.getElementById('result-modal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    // 페이지 로드 시 파일 목록 불러오기
+    fetchFileList();
+</script>
+
+</body>
+</html>
