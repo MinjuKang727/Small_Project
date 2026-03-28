@@ -80,3 +80,121 @@ penetrate =enter =pierce
 The explorers penetrated deep into the jungle and discovered gold.
 탐험가들은 정글 안으로 깊이 들어가서 황금을 발견했다.
 penetrating 형) 마음속을 꿰뚫어 보는 듯한
+masterpiece 명) 걸작, 명작(=masterwork)
+The Taj Mahal is a masterpiece in the history of architecture.
+타지마할은 건축 역사상에서 걸작이다.
+friction 명) 마찰
+friction 명) (의견) 충돌, 불과
+friction =discord =conflict
+At the end of a ride, coaster cars are slowed down by brake mechanisms that create friction between two surfaces.
+놀이기구가 끝날 때, 롤러코스터 차량은 두 표면 사이에 마찰을 일으키는 제동 장치에 의해 속도가 늦춰진다.
+friction <-> harmony 명) 조화, 화합
+frictional 형) 마찰의, 마찰로 움직이는
+rebellious 형) 반항적인(=defiant)
+rebellious 형) 반체제적인(=dissident)
+Parents must not give up on kids who are rebellious.
+부모들은 반항적인 아이들을 포기해서는 안 된다.
+rebellious <-> obedient 형) 순종적인
+rebel 동) 반란을 일으키다
+laudable 형) 칭찬할 만한(=praiseworthy)
+The medical idea of delaying death is entirely laudable.
+죽음을 연기한다는 의학적 발상은 전적으로 칭찬할 만한 것이다.
+laudable <-> shameful 형) 수치스러운
+irregular 형) 불규칙적인(=random)
+He has an irregular work schedule, so he rarely has time to meet.
+그는 근무 일정이 불규칙적이기 때문에 만날 시간이 거의 없다.
+irregular <-> steady 형) 꾸준한
+irregularity 명) 변칙
+excel 동) (남을) 능가하다(=surpass)
+It is a natural subconscious mind of humans to excel.
+남을 능가하려고 하는 것은 인간의 자연스러운 잠재의식이다.
+excellent 형) 훌륭한, 탁월한
+municipal 형) 지방 자치의, 시의(=civic)
+Homeless shelters are usually operated by a municipal agency.
+노숙자 쉼터는 보통 지방 자치 단체에 의해 운영된다.
+meddle 동) 간섭하다, 참견하다.(=interfere =nose)
+meddle 동) 건드리다, 손을 대다
+Foreign meddling in the conflict in eastern Ukraine worried NATO.
+동우크라이나 분쟁에 대해 외국이 간섭하는 것은 NATO를 우려하게 했다.
+meddler 명) 간섭하려는 사람
+grief 명) 깊은 슬픔, 비탄(=sorrow =distress)
+Despite the passage of time, the grief of losing a loved one never truly fades away.
+시간이 지나도, 사랑하는 사람을 잃은 깊은 슬픔은 절대 사라지지 않는다.
+isolent 형) 무례한, 버릇없는(=rude)
+The teacher punished the student for being insolent in class.
+선생님은 그 학생이 수업에서 무례했던 것에 대해 벌을 주었다.
+commendation 명) 칭찬, 인정(=praise)
+The firefighter received a commendation for bravery.
+그 소방관은 용감함으로 칭찬을 받았다.
+commendation <-> criticism 명) 비난, 비판
+
+빈출 숙어
+according to ~에 따르면(=in accordance with)
+According to the survey, income levels are correlated with reading habits.
+한 조사에 따르면 소득 수준은 독서 습관과 연관성이 있었다.
+take care of ~을 돌보다, 신경쓰다(=look after)
+The adults were supposed to take care of the young boy.
+어른들은 그 어린 소년을 돌봐야 했다.
+call for 요구하다, ~을 필요로 하다(=require =need)
+Maintaining togetherness calls for a good system of communication.
+연대감을 유지하는 것은 좋은 의사소통 체계를 요구한다.
+call on 청하다, 요청하다
+pick up ~를 (차에) 태우다(=collect)
+pick up (방송, 신호 등을) 포착하다
+pick up ~을 집다, 들어 올리다.
+We'll pick up my friends from the train station, and then we will head to the party together.
+우리는 기차역에서 내 친구들을 차에 태우고 나서, 함께 파티에 갈 것이다.
+build up 확립하다, 개발하다(=develop)
+You can build up strong social networks by relying on other people.
+당신은 다른 사람들에게 의지하며 강한 인간 관계망을 확립할 수 있다.
+take ~ into account ~을 고려하다(=consider)
+My supervisor has taken into account my performance and attitude in the evaluation.
+나의 상사는 평가에서 나의 성과와 태도를 고려했다.
+
+완성 어휘
+homage 명) 경의
+defy 동) 반항하다, 거역하다
+issuance 명) 발급, 배급
+perspicuous 형) 알기 쉬운, 명쾌한
+detached 형) 고립된, 무심한
+roster 명) 명단, 등록부
+exquisite 형) 매우 아름다운, 정교한
+strenuous 형) 몹시 힘든, 격렬한
+entrench 동) 확고하게 하다
+parochial 형) 편협한, 좁은
+promulgate 동) 널리 알리다
+trepidation 명) 두려움
+belittle 동) 얕보다, 과소평가하다
+crown 명) 왕위, 왕권
+punitive 형) 징벌적인, 처벌의, 가혹한
+hitch 동) 얻어 타다, 편승하다
+solidarity 명) 연대, 결속
+counteract 동) 대응하다
+throng 명) 인파, 군중
+quarantine 명) 격리
+arithmetic 명) 산수, 연산
+astound 동) 크게 놀라게 하다
+inattentive 형) 부주의한, 조심성이 없는
+rupture 명) 파열; 동) 파열되다
+repellent 형) 역겨운, 혐오감을 주는
+flux 명) 끊임없는 변화, 유동
+savvy 형) 요령 있는
+tenuous 형) 미약한, 보잘것없는
+tacit 형) 암묵적인, 무언의
+cluster 명) 무리
+negligence 명) 부주의, 태만
+remorse 명) 회한
+malleable 형) 영향을 잘 받는
+pale 형) 창백한, 옅은
+mantle 명) (표면을 덮고 있는) 꺼풀
+superficially 부) 표면적으로
+unprepossessing 형) 매력 없는
+bring about 일으키다, 야기하다
+take apart ~을 분해하다
+it follows that 결과적으로 ~이다
+get ahead 출세하다
+be off to ~로 떠나다
+tell from ~을 구분하다, ~으로 알다
+put on hold ~을 보류하다
+spread out 퍼지다
+go back on one's word 약속을 어기다
