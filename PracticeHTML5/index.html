@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="utf-8">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice HTML5</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <!-- 구문 강조를 위한 모드 추가 (예: JavaScript) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+
+            // CodeMirror 초기화
+            var  myCodeMirror  =  CodeMirror.fromTextArea ( document.getElementById("input_code"),  {
+                lineNumbers :  true , // 줄 번호 표시
+                mode :  "text/html" , // HTML 모드 설정
+                theme :  "default" , // 테마 설정 (원하는 테마로 변경 가능)
+                indentUnit :  4 , // 들여쓰기 단위 설정
+                tabSize :  4 , // 탭 크기 설정
+                lineWrapping :  true, // 긴 줄 자동 줄바꿈
+                theme : "default" // 테마 설정 (원하는 테마로 변경 가능)
+            } ) ;
+
+            function fn_msg() {
+                // 에디터에 입력된 값은 아래와 같이 가져올 수 있다.
+                var text = myCodeMirror.getValue();
+                alert(text);
+            }
+
+            $("#theme_selector").change(function() {
+                var selectedTheme = $(this).val();
+                myCodeMirror.setOption("theme", selectedTheme);
+            });
+
+            var hr = document.createElement("hr");
+            myCodeMirror.addLineWidget(lineNumber, hr);
+
+        });
+    </script>
+    <style>
+        .title {
+            font-size: 30px;
+            font-weight: bold;
+        }
+        .content {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 85vh;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .desc {
+            width: 30%;
+            height: 100%;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 2px solid rgb(32, 132, 255);
+            overflow: auto;
+            scrollbar-width: auto;
+            scrollbar-color: rgb(32, 132, 255) rgb(236, 247, 255);
+        }
+
+        .chapter {
+            font-size: 10px;
+            background-color: rgb(211, 235, 255);
+            width: fit-content;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .concept_desc {
+            font-size: 15px;
+        }
+        .example {
+            margin-top: 20px;
+        }
+        .example_num {
+            font-size: 15px;
+            font-weight: normal;
+            color: white;
+            background: linear-gradient(to bottom, #d0d0d0, #4f4f4f);
+            width: fit-content;
+            padding: 0 10px 1px 10px;
+            margin-right: 5px;
+            border-radius: 5px;
+            border: 1px solid black;
+        }
+        .example_title {
+            font-size: 15px;
+            font-weight: bold;
+            color: rgb(0, 133, 250);
+        }
+        .example_code {
+            background-color: rgb(236, 247, 255);
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid rgb(43, 142, 255);
+            margin-top: 10px;
+        }
+        .practice {
+            width: 70%;
+            height: 100%;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 2px solid rgb(32, 132, 255);
+            display: flex;
+            flex-direction: column;
+        }
+        .codemirror_theme {
+            display: flex;
+            justify-content: flex-start;
+        }
+        .theme_label {
+            font-size: 15px;
+            margin-left: auto;
+            margin-right: 10px;
+        }
+        .result {
+            height: 50%;
+            border: 1px solid rgb(43, 142, 255);
+            border-radius: 5px;
+            background-color: rgb(236, 247, 255);
+            margin-top: 10px;
+            
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <span class="title">Practice HTML5</span>
+    </div>
+
+    <div class="content">
+        <div class="desc">
+            <div class="chapter"><span class="chapter_title">제2장. HTML5: 웹 문서 만들기</span> / <span class="subtitle1">2.1 텍스트 표현</span> / <span class="subtitle2">2.1.1 줄을 바꾸는 br 요소</span></div>
+            <div class="concept"><span class="concept_desc">개념 설명 생략</span></div>
+            <div class="example">
+                <span class="example_num">예제 2-1</span> <span class="example_title">줄바꿈을 수행하는 br 요소</span>
+                <pre class="example_code"><code><!DOCTYPE html>
+                <html>
+                <head>
+                    <title> br 요소 </title>
+                </head>
+                <body>
+                    br 요소는 문서의 어느 곳에서든 강제로 줄바꿈을 수행한다. <br>
+                    여러 줄을 바꾸는 경우 원하는 개수만큼을 연속적으로 사용한다.
+                    <br/><br/><br/>
+                    br을 세 번 사용했으므로 위 문장 사이에는 빈 두 줄이 나타난다.
+                </body>
+                </html></code></pre>
+            </div>
+        </div>
+        <div class="practice">
+            <div class="codemirror_theme">
+                <span class="theme_label">CodeMirror 테마: </span>
+                <select id="theme_selector">
+                    <option value="default" selected>Default</option>
+                    <option value="mdn-like">mdn-like</option>
+                    <option value="xq-light">xq-light</option>
+                    <option value="railscast">railscast</option>
+                    <!-- 원하는 테마 추가 가능 -->
+                </select>
+            </div>
+
+            <textarea id="input_code" name="input_code" placeholder="여기에 코드를 입력하세요"></textarea>
+            <div class="result"></div>
+        </div>
+    </div>
+    
+</body>
+</html>
