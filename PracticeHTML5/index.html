@@ -6,39 +6,41 @@
     <title>Practice HTML5</title>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <!-- 테마 추가 (선택) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/mdn-like.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/xq-light.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/railscasts.min.css">
+    <!-- 2. CodeMirror JS Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-    <!-- 구문 강조를 위한 모드 추가 (예: JavaScript) -->
+    <!-- 3. 구문 강조 모드 (HTML/JS/CSS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
 
     <script>
+        var MyCodeMirror; // CodeMirror 인스턴스를 전역 변수로 선언
         $(document).ready(function() {
 
             // CodeMirror 초기화
-            var  myCodeMirror  =  CodeMirror.fromTextArea ( document.getElementById("input_code"),  {
+            myCodeMirror  =  CodeMirror.fromTextArea ( document.getElementById("input_code"),  {
                 lineNumbers :  true , // 줄 번호 표시
+                matchBrackets :  true , // 괄호 자동 매칭
+                styleActiveLine :  true , // 현재 줄 강조
+                lineWrapping :  true, // 긴 줄 자동 줄바꿈
                 mode :  "text/html" , // HTML 모드 설정
                 theme :  "default" , // 테마 설정 (원하는 테마로 변경 가능)
                 indentUnit :  4 , // 들여쓰기 단위 설정
                 tabSize :  4 , // 탭 크기 설정
-                lineWrapping :  true, // 긴 줄 자동 줄바꿈
-                theme : "default" // 테마 설정 (원하는 테마로 변경 가능)
             } ) ;
 
-            function fn_msg() {
-                // 에디터에 입력된 값은 아래와 같이 가져올 수 있다.
-                var text = myCodeMirror.getValue();
-                alert(text);
-            }
-
-            $("#theme_selector").change(function() {
-                var selectedTheme = $(this).val();
-                myCodeMirror.setOption("theme", selectedTheme);
-            });
-
-            var hr = document.createElement("hr");
-            myCodeMirror.addLineWidget(lineNumber, hr);
-
         });
+
+        function changeTheme() {
+            var selectedTheme = $("#theme_selector").val();
+            myCodeMirror.setOption("theme", selectedTheme);
+        };
+
     </script>
     <style>
         .title {
@@ -157,11 +159,11 @@
         <div class="practice">
             <div class="codemirror_theme">
                 <span class="theme_label">CodeMirror 테마: </span>
-                <select id="theme_selector">
+                <select id="theme_selector" onchange="changeTheme()">
                     <option value="default" selected>Default</option>
-                    <option value="mdn-like">mdn-like</option>
                     <option value="xq-light">xq-light</option>
-                    <option value="railscast">railscast</option>
+                    <option value="mdn-like">mdn-like</option>
+                    <option value="railscasts">railscasts</option>
                     <!-- 원하는 테마 추가 가능 -->
                 </select>
             </div>
