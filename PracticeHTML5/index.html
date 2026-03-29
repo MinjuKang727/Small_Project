@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
     <!-- 테마 추가 (선택) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/mdn-like.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/xq-light.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/railscasts.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/duotone-light.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/lucario.min.css">
     <!-- 2. CodeMirror JS Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
     <!-- 3. 구문 강조 모드 (HTML/JS/CSS) -->
@@ -28,11 +28,21 @@
                 matchBrackets :  true , // 괄호 자동 매칭
                 styleActiveLine :  true , // 현재 줄 강조
                 lineWrapping :  true, // 긴 줄 자동 줄바꿈
-                mode :  "text/html" , // HTML 모드 설정
+                mode :  "htmlmixed" , // HTML 모드 설정
                 theme :  "default" , // 테마 설정 (원하는 테마로 변경 가능)
                 indentUnit :  4 , // 들여쓰기 단위 설정
                 tabSize :  4 , // 탭 크기 설정
             } ) ;
+
+            $("#run_code").mousedown(function() {
+                $(this).css("background-color", "rgb(63, 174, 63)");
+                $(this).css("border-bottom", "none");
+                $(this).css("margin-top", "4px");
+            }).mouseup(function() {
+                $(this).css("background-color", "rgb(3, 167, 3)");
+                $(this).css("border-bottom", "4px solid rgb(0, 133, 0)");   
+                $(this).css("margin-top", "0");
+            });
 
         });
 
@@ -40,6 +50,16 @@
             var selectedTheme = $("#theme_selector").val();
             myCodeMirror.setOption("theme", selectedTheme);
         };
+
+        function runCode() {
+            var code = myCodeMirror.getValue();
+            $("#result").html(code);
+            if (code.trim() === "") {
+                $("#result").css("border", "none");
+            } else {
+                $("#result").css("border", "1px solid rgb(1, 11, 22)");
+            }
+        }
 
     </script>
     <style>
@@ -112,6 +132,22 @@
             display: flex;
             flex-direction: column;
         }
+        .practice_header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #run_code {
+            padding: 4px 10px 5px 10px;
+            font-size: 15px;
+            background-color: rgb(3, 167, 3);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            border-bottom: 4px solid rgb(0, 133, 0);
+        }
         .codemirror_theme {
             display: flex;
             justify-content: flex-start;
@@ -121,14 +157,25 @@
             margin-left: auto;
             margin-right: 10px;
         }
+        
+        hr {
+            margin: 10px 0;
+            border: none;
+            border-top: 1px solid rgb(32, 132, 255);
+        }
         .result {
             height: 50%;
-            border: 1px solid rgb(43, 142, 255);
-            border-radius: 5px;
-            background-color: rgb(236, 247, 255);
-            margin-top: 10px;
-            
+            overflow: auto;
+            scrollbar-width: auto; 
+            scrollbar-color: rgb(32, 132, 255) rgb(236, 247, 255);
         }
+        #result {
+            margin: auto;
+            width: fit-content;
+            height: fit-content;
+            padding: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -157,19 +204,24 @@
             </div>
         </div>
         <div class="practice">
-            <div class="codemirror_theme">
-                <span class="theme_label">CodeMirror 테마: </span>
-                <select id="theme_selector" onchange="changeTheme()">
-                    <option value="default" selected>Default</option>
-                    <option value="xq-light">xq-light</option>
-                    <option value="mdn-like">mdn-like</option>
-                    <option value="railscasts">railscasts</option>
-                    <!-- 원하는 테마 추가 가능 -->
-                </select>
+            <div class="practice_header">
+                <div class="codemirror_theme">
+                    <span class="theme_label">CodeMirror 테마: </span>
+                    <select id="theme_selector" onchange="changeTheme()">
+                        <option value="default" selected>Default</option>
+                        <option value="mdn-like">mdn-like</option>
+                        <option value="duotone-light">duotone-light</option>
+                        <option value="lucario">lucario</option>
+                        <!-- 원하는 테마 추가 가능 -->
+                    </select>
+                </div>
+                <button id="run_code" onclick="runCode()" title="코드 실행">▶</button>
             </div>
-
             <textarea id="input_code" name="input_code" placeholder="여기에 코드를 입력하세요"></textarea>
-            <div class="result"></div>
+            <hr>
+            <div class="result">
+                <div id="result"></div>
+            </div>
         </div>
     </div>
     
