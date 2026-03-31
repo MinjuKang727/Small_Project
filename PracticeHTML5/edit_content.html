@@ -18,9 +18,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
     <script>
-        var MyCodeMirror; // CodeMirror 인스턴스를 전역 변수로 선언
-        $(document).ready(function() {
+        // GITHUB 관련 변수
+        const username = 'MinjuKang727';
+        const repo = 'SmallProject';
+        const path = 'PracticeHTML5/data/data.json';
+        const GITHUB_URL = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
+        var jsonData; // JSON 데이터 저장 변수
 
+        var myCodeMirror; // CodeMirror 인스턴스를 전역 변수로 선언
+
+        $(document).ready(function() {
             // CodeMirror 초기화
             myCodeMirror  =  CodeMirror.fromTextArea ( document.getElementById("example_code"),  {
                 lineNumbers :  true , // 줄 번호 표시
@@ -33,25 +40,54 @@
                 tabSize :  4 , // 탭 크기 설정
             } ) ;
 
-            $("#run_code").mousedown(function() {
-                $(this).css("background-color", "rgb(63, 174, 63)");
-                $(this).css("border-bottom", "none");
-                $(this).css("margin-top", "4px");
-            }).mouseup(function() {
-                $(this).css("background-color", "rgb(3, 167, 3)");
-                $(this).css("border-bottom", "4px solid rgb(0, 133, 0)");   
-                $(this).css("margin-top", "0");
-            });
+            $.ajax({
+                url: GITHUB_URL,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    console.log('success');
+                    if (data && data.length > 0) {
+                        console.log('데이터가 존재합니다.', data);
+                        jsonData = data;
+                        
+                        // 챕터 목록 리스트 정리 쿼리 작성하기
 
+                    } else {
+                        console.log('데이터가 비어있습니다.');
+                        jsonData = {};
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.status === 404) {
+                        console.log("404 오류: json 파일이 존재하지 않습니다. 새 파일을 생성합니다.");
+                        jsonData = {};
+                    } else {
+                        console.error("기타 오류 발생:", status, error);
+                    }
+                }
+            });
+        });
+
+        var bgColor;
+        var bottomColor;
+
+        $("#run").mousedown(function() {
+            bgColor = $(this).css("background-color");
+            bottomColor = $(this).css("border-bottom");
+            $(this).css("border-bottom", "none");
+            $(this).css("margin-top", "4px");
+        }).mouseup(function() {
+            $(this).css("border-bottom", bottomColor);   
+            $(this).css("margin-top", "0");
         });
 
         function changeTheme() {
-            var selectedTheme = $("#theme_selector").val();
+            const selectedTheme = $("#theme_selector").val();
             myCodeMirror.setOption("theme", selectedTheme);
         };
 
         function runCode() {
-            var code = myCodeMirror.getValue();
+            const code = myCodeMirror.getValue();
             $("#result").html(code);
             if (code.trim() === "") {
                 $("#result").css("border", "none");
@@ -61,33 +97,101 @@
         }
 
         function convertCode() {
-            var code = myCodeMirror.getValue();
-            var convertedCode = code.replace(/</g, "&lt;")
+            const code = myCodeMirror.getValue();
+            const convertedCode = code.replace(/</g, "&lt;")
                                     .replace(/>/g, "&gt;")
                                     .replace(/\n/g, "<br>")
                                     .replace(/ /g, "&nbsp;");
             myCodeMirror.setValue(convertedCode);
         }
 
-        $(document).ready(function() {
-            var username = 'MinjuKang727'; // 자신의 GitHub 아이디로 변경
-            
-            $.ajax({
-                url: 'https://api.github.com' + username + '/CodingWithGemini/practiceHTML5/data/test.json',
-                type: 'PUT',
-                headers: {
-                    'Authorization': 'token ' + 'YOUR_PERSONAL_ACCESS_TOKEN'
-                },
-                data: JSON.stringify({
-                    message: 'Commit message from jQuery',
-                    content: btoa(JSON.stringify({key: 'value'})), // 데이터는 Base64로 인코딩
-                    sha: '기존파일SHA' // 수정 시 필수
-                }),
-                success: function(response) {
-                    console.log('Saved!', response);
-                }
-            });
-        });
+        // function saveContent() {
+        //     const chapter_li = $(".chapter input").map(function() {
+        //                                                 return $(this).val().trim();
+        //                                             }).get();
+        //     const concept = $(".input_desc").val().trim();
+        //     const exampleNum = $(".input_ex_num").val().trim();
+        //     const exampleTitle = $(".input_ex_title").val().trim();
+        //     const exampleCode = myCodeMirror.getValue().trim();
+
+        //     var idx = 0;
+        //     var chpTitle = chapter_li[idx++];
+        //     var contentLen = 
+
+        //     for (var content in jsonData['contents']) {
+        //         if (content['chapter'] === chapter[0]) {
+        //             for (var subcontent in content['contents']) {
+        //                 if (subcontent['subchapter'] === subtitle1) {
+        //                     for (var subcontent2 in subcontent['contents']) {
+        //                         if (subcontent2['subchapter'] === subtitle2) {
+        //                             subcontent2['examples'].push({
+        //                                 concept: concept,
+        //                                 exampleNum: exampleNum,
+        //                                 exampleTitle: exampleTitle,
+        //                                 exampleCode: exampleCode
+        //                             });
+        //                             return; // 함수 종료
+        //                         }
+        //                     }
+        //                     subcontent['examples'].push({
+        //                         concept: concept,
+        //                         exampleNum: exampleNum,
+        //                         exampleTitle: exampleTitle,
+        //                         exampleCode: exampleCode
+        //                     });
+        //                     return; // 함수 종료
+        //                 }
+        //             }
+
+        //             content['subtitle1'] = subtitle1;
+        //             content['subtitle2'] = subtitle2;
+        //             content['examples'].push({
+        //                 concept: concept,
+        //                 exampleNum: exampleNum,
+        //                 exampleTitle: exampleTitle,
+        //                 exampleCode: exampleCode
+        //             });
+        //             return; // 함수 종료
+        //         }
+        //     }
+        //     if (!(chapterTitle in jsonData['contents'])) {
+        //         jsonData['chapterTitle'] = chapterTitle;
+        //     }
+        //     const contentData = JSON.stringify({
+        //         "chapter": chapterTitle,
+        //         subtitle1: subtitle1,
+        //         subtitle2: subtitle2,
+        //         examples: [
+        //             {
+        //                 concept: concept,
+        //                 exampleNum: exampleNum,
+        //                 exampleTitle: exampleTitle,
+        //                 exampleCode: exampleCode
+        //             }
+        //         ],
+        //         questions: []
+        //     });
+        //     const encodedContent = btoa(unescape(encodeURIComponent(contentData)));
+
+        //     // JSON 파일로 저장 (예시에서는 콘솔에 출력)
+        //     console.log(contentData);
+
+            // $.ajax({
+            //     url: GITHUB_URL,
+            //     type: 'PUT',
+            //     headers: {
+            //         'Authorization': `token ${GITHUB_ACCESS_TOKEN}`
+            //     },
+            //     data: JSON.stringify({
+            //         message: 'Commit message from jQuery',
+            //         content: btoa(JSON.stringify({key: 'value'})), // 데이터는 Base64로 인코딩
+            //         sha: '기존파일SHA' // 수정 시 필수
+            //     }),
+            //     success: function(response) {
+            //         console.log('Saved!', response);
+            //     }
+            // });
+        // }
     </script>
     <style>
         .title {
@@ -180,14 +284,54 @@
         }
 
         .btn {
-            width: 40px;
-            height: 40px;
-            background-color: rgb(3, 167, 3);
-            color: white;
+            width: fit-content;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+        }
+
+        .square {
+            aspect-ratio: 1 / 1;
+        }
+
+        .lectangle {
+            aspect-ratio: 2 / 1;
+        }
+
+        .small {
+            min-width: 20px;
+        }
+
+        .normal {
+            min-width: 40px;
+        }
+
+        .long {
+            min-width: 60px;
+        }
+
+        .green {
+            background-color: rgb(3, 167, 3);
             border-bottom: 4px solid rgb(0, 133, 0);
+            color: white;
+        }
+
+        .red {
+            background-color: rgb(247, 91, 91);
+            border-bottom: 4px solid rgb(133, 0, 0);
+            color: white;
+        }
+
+        .blue {
+            background-color: rgb(32, 132, 255);
+            border-bottom: 4px solid rgb(0, 82, 255);
+            color: white;
+        }
+
+        .orange {
+            background-color: rgb(255, 166, 0);
+            border-bottom: 4px solid rgb(173, 95, 0);
+            color: white;
         }
 
         #convert {
@@ -204,13 +348,13 @@
             border: none;
             border-top: 1px solid rgb(32, 132, 255);
         }
-        .result {
+        .practice_bottom {
             height: 50%;
             overflow: auto;
             scrollbar-width: auto; 
             scrollbar-color: rgb(32, 132, 255) rgb(236, 247, 255);
         }
-        #result {
+        .result {
             margin: auto;
             width: fit-content;
             height: fit-content;
@@ -226,7 +370,12 @@
 
     <div class="content">
         <div class="desc">
-            <div class="chapter"><input type="text" class="chapter_title" placeholder="제1장. 웹프로그래밍 개요"> / <input type="text" class="subtitle1" placeholder="2.1 텍스트 표현"> / <input type="text" class="subtitle2" placeholder="2.1.1 줄을 바꾸는 br 요소"></div>
+            <div class="chapter">
+                <input type="text" class="chapter_title" placeholder="제1장. 웹프로그래밍 개요">
+                 / <input type="text" class="subtitle1" placeholder="2.1 텍스트 표현">
+                  / <input type="text" class="subtitle2" placeholder="2.1.1 줄을 바꾸는 br 요소">
+                <button class="btn blue small square" id="add_input" title="소제목 추가">+</button>
+            </div>
             <div class="concept"><textarea class="input_desc" placeholder="개념 설명"></textarea></div>
             <div class="example">
                 <div class="example_header">
@@ -235,15 +384,16 @@
                         <input type="text" class="ex_title input_ex_title" placeholder="줄바꿈을 수행하는 br 요소">
                     </div>
                     <div class="btn_group">
-                        <button class="btn" id="convert" onclick="convertCode()" title="코드 변환">↻</button>
-                        <button class="btn" id="run" onclick="runCode()" title="코드 실행">▶</button>
+                        <button class="btn green normal square" id="convert" onclick="convertCode()" title="코드 변환">↻</button>
+                        <button class="btn green normal square" id="run" onclick="runCode()" title="코드 실행">▶</button>
                     </div>
                 </div>
                 <textarea class="input_ex_code" id="example_code" placeholder="코드 입력"></textarea>
                 <hr>
-                <div class="result">
-                    <div id="result"></div>
+                <div class="practice_bottom">
+                    <div class="result" id="result"></div>
                 </div>
+                <button class="btn orange long lectangle" id="save" title="저장" onclick="saveContent()" title="저장">SAVE</button>
             </div>
         </div>
     </div>

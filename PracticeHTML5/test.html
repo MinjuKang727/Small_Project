@@ -19,20 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
 
     <script>
-        var MyCodeMirror; // CodeMirror 인스턴스를 전역 변수로 선언
         $(document).ready(function() {
-
-            // CodeMirror 초기화
-            myCodeMirror  =  CodeMirror.fromTextArea ( document.getElementById("input_code"),  {
-                lineNumbers :  true , // 줄 번호 표시
-                matchBrackets :  true , // 괄호 자동 매칭
-                styleActiveLine :  true , // 현재 줄 강조
-                lineWrapping :  true, // 긴 줄 자동 줄바꿈
-                mode :  "htmlmixed" , // HTML 모드 설정
-                theme :  "default" , // 테마 설정 (원하는 테마로 변경 가능)
-                indentUnit :  4 , // 들여쓰기 단위 설정
-                tabSize :  4 , // 탭 크기 설정
-            } ) ;
 
             $("#run").mousedown(function() {
                 $(this).css("background-color", "rgb(63, 174, 63)");
@@ -44,12 +31,60 @@
                 $(this).css("margin-top", "0");
             });
 
-        });
 
-        function changeTheme() {
-            var selectedTheme = $("#theme_selector").val();
-            myCodeMirror.setOption("theme", selectedTheme);
-        };
+            $('#input_code').on('input', function(e) {
+                const value = $(this).val();
+                const lines = value.split('\n').length;
+
+                // 줄번호 입력
+                $('.line_numbers').html(Array(lines).fill(0).map((_, i) => `<span>${i + 1}</span>`).join('<br>'));
+            });
+
+            // 스크롤 동기화
+            $('#input_code').scroll(function() {
+                $('.line_numbers').scrollTop($(this).scrollTop());
+            });
+
+            $('#input_code').keydown(function(e) {
+                if (e.shiftKey && e.keyCode === 9) {  // keyCode: 13(Shift키), keyCode: 9(Tab키)
+                    // 내어쓰기
+                    e.preventDefault();  // 포커스 이동 막기
+                    let start = $(this).get(0).selectionStart;
+                    let end = $(this).get(0).selectionEnd;
+                    let value = $(this).val();
+                    let lineStart = value.lastIndexOf('\n', start - 1) + 1;
+
+                    // 내어쓰기 로직
+                    for (let i = 4; i > 0; i--) {
+                        if (value.substring(lineStart, lineStart + i) === ' '.repeat(i)) {
+                            $(this).val(value.substring(0, lineStart) + value.substring(lineStart + i));
+                            $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start - i;
+                            break;
+                        }
+                    }
+                } else if (e.keyCode === 9) {  // keyCode: 9(Tab키)
+                    // 들여쓰기
+                    e.preventDefault();  // 포커스 이동 막기
+                    let value = $(this).val();
+                    let start = $(this).get(0).selectionStart;
+                    let end = $(this).get(0).selectionEnd;
+                    const indent = " ".repeat(4);  // 들여쓰기: 공백 4칸
+                    
+                    $(this).val(value.substring(0, start) + indent + value.substring(end))
+                    $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + indent.length;
+                } else if (e.keyCode === 13) {  // keyCode: 13(Enter키)
+                    // 자동 들여쓰기
+                    let start = $(this).get(0).selectionStart;
+                    let end = $(this).get(0).selectionEnd;
+                    let prevLineStart = value.lastIndexOf('\n', start - 2) + 1;
+                    let prevLine = value.substring(prevLineStart, start - 1);
+                    let indentSize = prevLine.match(/^\s*/)[0].length;
+                    let indent = " ".repeat(indentSize);
+                    $(this).val(value.substring(0, start) + indent + value.substring(end))
+                    $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + indent.length;
+                }
+            });
+        });
 
         function runCode() {
             var code = myCodeMirror.getValue();
@@ -75,6 +110,9 @@
             border-top: 1px solid rgb(32, 132, 255);
         }
 
+        textarea {
+            outline: none;
+        }
         /* 공통 스타일 지정 */
         .font_small {
             font-size: 15px;
@@ -172,14 +210,43 @@
             cursor: pointer;
             border-bottom: 4px solid rgb(0, 133, 0);
         }
-        .codemirror_theme {
+        .code_editor {
             display: flex;
-            justify-content: flex-start;
+            gap: 10px;
+            height: 40%;
         }
-        .theme_label {
+        .line_numbers {
+            width: 15px;
+            background-color: #d1e4ff;
+            padding: 10px;
+            text-align: right;
+            color: rgb(41, 105, 194);
+            font-family: monospace;
             font-size: 15px;
-            margin-left: auto;
-            margin-right: 10px;
+            line-height: 20px;
+            user-select: none; /* 줄 번호 선택 방지 */
+            overflow: auto;
+            scrollbar-width: none;
+        }
+        .input_code {
+            width: 100%;
+            height: 100%;
+            font-size: 15px;
+            padding: 10px;
+            border: 1px solid rgb(43, 142, 255);
+            margin-bottom: 20px;
+            /* 선 넣기 핵심 CSS */
+            line-height: 20px; /* 줄 높이 */
+            background-image: linear-gradient(#1b82ff 1px, transparent 1px);
+            background-size: 100% 20px; /* line-height와 동일하게 설정 */
+            background-position: 0 10px; /* 텍스트 높이에 맞게 조절 */
+            background-attachment: local; /* 스크롤 시 배경도 같이 움직이도록 설정 */
+            resize: none;
+            box-sizing: border-box;
+            overflow: auto;
+            scrollbar-width: auto;
+            scrollbar-color: rgb(32, 132, 255) rgb(236, 247, 255);
+            tab-size: 4;
         }
         
         .practice_bottom {
@@ -245,22 +312,12 @@
         </div>
         <div class="practice">
             <div class="practice_header">
-                <div class="codemirror_theme">
-                    <span class="theme_label">CodeMirror 테마: </span>
-                    <select id="theme_selector" onchange="changeTheme()">
-                        <option value="default" selected>Default</option>
-                        <option value="mdn-like">mdn-like</option>
-                        <option value="duotone-light">duotone-light</option>
-                        <option value="lucario">lucario</option>
-                        <!-- 원하는 테마 추가 가능 -->
-                    </select>
-                </div>
-
                 <button class="btn" id="run" onclick="runCode()" title="코드 실행">▶</button>
             </div>
-
-            <textarea id="input_code" name="input_code" placeholder="여기에 코드를 입력하세요"></textarea>
-
+            <div class="code_editor">
+                <div class="line_numbers"><span>1</span></div>
+                <textarea class="input_code" id="input_code" name="input_code" placeholder="여기에 코드를 입력하세요"></textarea>
+            </div>
             <hr>
 
             <div class="practice_bottom">
