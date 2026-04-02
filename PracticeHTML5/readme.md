@@ -51,7 +51,8 @@
             - 3차 수정: 띄어쓰기(' ')를 &nbsp;로 변경
                 > 결과: 모든 입력 내용이 제대로 출력됨!
                 ![3차 수정 결과 사진](images/TroubleShooting_showRawTag4.png)
-        2. 코드 입력창을 단순한 Textarea가 아니라 선도 그어져 있고 줄 번호도 보이게 해서 Code editor처럼 만들고 싶었음.
+
+        **2. 코드 입력창을 단순한 Textarea가 아니라 선도 그어져 있고 줄 번호도 보이게 해서 Code editor처럼 만들고 싶었음.**
             ![Textarea 처음 사진](images/TroubleShooting_DesignCodeEditor1.png)
             - 1차 수정: css에 아래 옵션을 줘서 배경 색 변경 및 선 추가
                 <pre>background-color: rgb(22, 31, 37);
@@ -158,18 +159,23 @@
                 ![4차 수정 결과 사진](images/TroubleShooting_DesignCodeEditor5.gif)
 
             - 5차 수정: 자동 들여쓰기를 JQuery로 구현
-                <pre>$('#input_code').keydown(function(e) {
-                    if (e.keyCode === 13) {  // keyCode: 13(Enter키)
+                <pre>$('#input_code').on('input', function(e) {
+                const value = $(this).val();
+                let start = $(this).get(0).selectionStart;
+                let end = $(this).get(0).selectionEnd;
+
                     // 자동 들여쓰기
-                    let start = $(this).get(0).selectionStart;
-                    let end = $(this).get(0).selectionEnd;
-                    let prevLineStart = value.lastIndexOf('\n', start - 2) + 1;
-                    let prevLine = value.substring(prevLineStart, start - 1);
-                    let indentSize = prevLine.match(/^\s*/)[0].length;
-                    let indent = " ".repeat(indentSize);
-                    $(this).val(value.substring(0, start) + indent + value.substring(end))
-                    $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + indent.length;
-                }
+                    if (value.charAt(start - 1) === "\n") {
+                        let prevLineStart = value.lastIndexOf('\n', start - 2) + 1;
+                        let prevLine = value.substring(prevLineStart, start);
+                                
+                        if (prevLine.startsWith(" ")) {
+                            let indentSize = prevLine.match(/^\s*/)[0].length;
+                            let indent = " ".repeat(indentSize);
+                            $(this).val(value.substring(0, start) + indent + value.substring(end));
+                            $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + indent.length;
+                        }
+                    }
                 });</pre>
 
                 > 결과: 윗줄의 들여쓰기되어 있는 만큼 아랫줄에도 자동으로 들여쓰기 되도록 함.  
@@ -208,11 +214,96 @@
                 CodeMirror가 테마 변경도 가능하고 태그와 텍스트의 색도 구별이 되어 가독성이 좋았지만
                 제가 직접 구현한 것이 줄번호, 선도 보이고 들여쓰기, 내어쓰기, 자동 들여쓰기 기능까지 구현되어서 CodeMirror 대신 제가 구현한 것을 쓰기로 결정하였습니다.
                 ![5차 수정 결과 사진](images/TroubleShooting_DesignCodeEditor6.gif)
+        
+        **3. 코드 입력창 자동 들여쓰기 구현하기**  
+        > 이전 버전의 html에서 직접 구현한 코드 입력창의 자동 들여쓰기 기능을 약간 수정하였습니다.  
+        Jquery로 Enter키의 keydown 이벤트를 감지하여 쿼리가 동작하도록 수정하였는데  
+        아래 줄에서 들여쓰기가 되지 않고 이전 줄 끝에 들여쓰기가 들어가는 문제가 발생하였습니다..
+
+            - 원인: #input_code의 값을 slice(-1), endsWith("\n") 등으로 확인해 본 결과  
+            줄바꿈(\n)이 되기 전에 구현한 쿼리가 실행된다는 것을 확인하였습니다.
+
+        - 1차 수정: setInterval(), clearInterval()을 이용하여 "\n"가 입력될 때까지 대기해 보았습니다.  
+            > 결과: "\n"가 입력되지 않고 setInterval()의 함수가 무한 반복되었습니다.☠️
+
+        - 2차 수정: Enter키의 keydown 이벤트를 감지하는 것이 문제일까? 해서 keyup 이벤트를 감지하도록 수정하였습니다.
+            <pre>$("#input_code").keyup(function(e) {
+                if (e.keyCode === 13) {  // keyCode: 13(Enter키)
+                    // 자동 들여쓰기
+                    let value = $(this).val();
+                    let start = $(this).get(0).selectionStart;
+                    let end = $(this).get(0).selectionEnd;
+                    let prevLineStart = value.lastIndexOf('\n', start - 2) + 1;
+                    let prevLine = value.substring(prevLineStart, start);
+                            
+                    if (prevLine.startsWith(" ")) {
+                        let indentSize = prevLine.match(/^\s*/)[0].length;
+                        let indent = " ".repeat(indentSize);
+                    
+                        $(this).val(value.substring(0, start) + indent + value.substring(end + 2));
+                        $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + indent.length;
+                    }
+                }
+            });</pre>
+
+            > 결과: 원하는대로 들여쓰기가 되긴하는데 커서가 이전과 달리 바꾼 줄의 맨 앞에 커서가 생겼다가 들여쓰기한 위치로 커서가 이동하는 것이 보였습니다.  
+            그리고 문장의 맨 끝이 아닌 문단의 중간에서 들여쓰기를 하면 자동 들여쓰기가 적용된 새 줄이 생기지 않고 그 다음줄에 들여쓰기가 적용되었습니다.
+
+            ![2차 수정 결과 사진](images/TroubleShooting_AutoIndent3.gif)
+        
+        - 3차 수정: #input_code의 textarea의 input 이벤트를 감지하여 현재 커서가 위치한 인덱스 이전의 문자가 "\n"이고 이전 줄이 들여쓰기로 시작했을 때(문장의 맨 앞이 공백으로 시작할 때) 들여쓰기 수행
+            <pre>$('#input_code').on('input', function(e) {
+                let value = $(this).val();
+                let start = $(this).get(0).selectionStart;
+                let end = $(this).get(0).selectionEnd;
+
+                // 자동 들여쓰기
+                if (value.charAt(start - 1) === "\n") {
+                    let prevLineStart = value.lastIndexOf('\n', start - 2) + 1;
+                    let prevLine = value.substring(prevLineStart, start);
+                            
+                    if (prevLine.startsWith(" ")) {
+                        let indentSize = prevLine.match(/^\s*/)[0].length;
+                        let indent = " ".repeat(indentSize);
+                        $(this).val(value.substring(0, start) + indent + value.substring(end));
+                        $(this).get(0).selectionStart = $(this).get(0).selectionEnd = start + indent.length;
+                    }
+                }
+            });</pre>
+
+            > 결과: 줄바꿈 시, 줄 맨 앞에 커서가 보였다가 들여쓰기 되는 것이 아니라 바로 들여쓰기 위치로 커서 이동 되었습니다.  
+            맨 마지막 문단, 중간 문단 어디서든 엔터키를 치면 앞 줄의 들여쓰기 만큼 자동으로 들여쓰기 기능이 동작하도록 구현하였습니다.
+            
+            ![3차 수정 결과 사진](images/TroubleShooting_AutoIndent4.gif)
+
+        **4. 데이터 저장 구조 선택**
+        > 단원별 개념과 예제 코드를 JSON 데이터로 저장하려고 하니 조회할 때, 단원별로 조회하기 어려웠습니다.
+
+        <pre>{
+        "contents": [
+            {
+                "chapter": "제1장 웹 프로그래밍 개요", 
+                "contents": [
+                                {
+                                    "subchapter": "1.1 웹 개요",
+                                    "page": 2,
+                                    "contents": []
+                                }, ...
+                            ]
+                }, ...
+            ]
+        }</pre>
+
 
 
 
 #### 데이터 업로드 및 수정 페이지 구성
 > 개발을 하며 일일이 데이터를 입력 및 저장하는 것이 번거로울 것 같아서 편집 페이지를 만들게 되었습니다.
 
-1. 
+**수정 페이지 구성**
+- 목차
+- 개념 및 예제 코드
+- 퀴즈
+
+
 
