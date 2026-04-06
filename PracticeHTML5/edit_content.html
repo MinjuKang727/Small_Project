@@ -20,7 +20,7 @@
     <!-- jstree -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js" integrity="sha512-Rzhxh2sskKwa+96nRopp/hvGexBzEPG6mnFI6uRy059FZfksJJFYmqDFn050KUDhivXLsT6SvoaEf5iSp2SHjg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-
+        let jsonData = {}; // JSON 데이터 저장 변수
         let myCodeMirror; // CodeMirror 인스턴스를 전역 변수로 선언
 
         $(document).ready(function() {
@@ -348,11 +348,14 @@
 
             if (thisType === "category") {
                 let data = [];
+                let idCounter = 0; // 고유 ID를 위한 카운터
                 $("#type_category").find("ul").each(function() {
-                    let parentId = parseInt($(this).attr("id").split("_")[1]);
+                    // let parentId = parseInt($(this).attr("id").split("_")[1]);
+                    let parentId = idCounter++;
 
                     $(this).children("li").each(function() {
-                        let thisId = parseInt($(this).attr("id").split("_")[1]) - 1;
+                        // let thisId = parseInt($(this).attr("id").split("_")[1]) - 1;
+                        let thisId = idCounter++;
                         let thisNth = $(this).index();
                         let thisTitle = $(this).children("div").children(".chapter_title").val();
                         let thisPage = $(this).children("div").children(".chapter_page").val();
@@ -380,10 +383,10 @@
 
         // JSON 데이터 저장 (GitHub API 사용)
         function saveContent() {
-            let jsonData = convertToJSON();  // JSON 데이터 저장 변수
+            jsonData = convertToJSON();  // JSON 데이터 저장 변수
             let payload = {
                 message: "UPDATE 'practiceHTML5' JSON 데이터",
-                content: btoa(jsonData), // 데이터는 Base64로 인코딩
+                content: window.btoa(unescape(encodeURIComponent( jsonData ))), // 데이터는 Base64로 인코딩
                 branch: "main" // 저장할 브랜치
             };
 
@@ -396,6 +399,33 @@
                 data: JSON.stringify(payload),
                 success: function(response) {
                     console.log('Saved!', response);
+                }
+            });
+        }
+
+        function getContent() {
+            $.ajax({
+                url: GITHUB_URL,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    console.log('success');
+                    if (data && data.length > 0) {
+                        console.log('데이터가 존재합니다.', data);
+                        jsonData = data;
+                        
+                        // 단원 목록 리스트 정리 쿼리 작성하기
+
+                    } else {
+                        console.log('데이터가 비어있습니다.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if (xhr.status === 404) {
+                        console.log("404 오류: json 파일이 존재하지 않습니다. 새 파일을 생성합니다.");
+                    } else {
+                        console.error("기타 오류 발생:", status, error);
+                    }
                 }
             });
         }
