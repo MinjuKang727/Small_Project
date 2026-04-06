@@ -28,6 +28,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    env:
+      # GitHub Secrets에서 값을 가져와 환경 변수로 설정
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }} 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,8 +44,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-      - name: access to secret
-          run: |
-          echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> .env
-        env:
-          ACCESS_TOKEN: ${{secrets.ACCESS_TOKEN}}
+      - name: Replace token in html
+        run: |
+          sed -i 's|__ACCESS_TOKEN__|${{ env.ACCESS_TOKEN }}|g' ./PracticeHTML5/edit_content.html
+
