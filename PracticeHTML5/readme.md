@@ -31,7 +31,7 @@
 - 조건 1: 가독성
 ![실습 페이지 구성: 왼쪽 상단 제목, 그 아래 왼쪽 반은 개념 설명 및 예제 코드, 오른쪽 반 중 위쪽은 코드 작성 공간 그 아래는 작성한 코드 실행 결과가 보이게 구성해 봄.](images/practice_page_design1.png)
 - 2026.03.30 : 1차 완성
-![실습 페이지 1차 완성본 사진](images/20230330_practicePage_ver1.png)
+![실습 페이지 1차 완성본 사진](images/20260330_practicePage_ver1.png)
     - 트러블 슈팅💥
         1. **예제 코드에 raw code가 아닌 실행 결과가 보임**
             ![예제 코드에 raw code가 아닌 실행 결과가 보이는 사진](images/TroubleShooting_showRawTag1.png)
@@ -301,9 +301,60 @@
 > 개발을 하며 일일이 데이터를 입력 및 저장하는 것이 번거로울 것 같아서 편집 페이지를 만들게 되었습니다.
 
 **수정 페이지 구성**
-- 목차
-- 개념 및 예제 코드
-- 퀴즈
+> 페이지 상단 radio 버튼으로 수정 유형 선택 → Jquery로 보이는 수정 페이지 변경
 
 
+- 목차  
+    <img src="images/20260402_editPage_category_ver1.png" alt="목차 수정 페이지 사진" style="height:250px; width:auto;">
+    - 상단 단원 추가 버튼 '+'
+    - 추가된 단원 구성
+        - 단원 제목
+        - 페이지 번호
+        - 단원 위로 옮기기 '↑': 현재 단원과 하위 단원을 함께 옮김
+        - 단원 아래로 옮기기 '↓'
+        - 소단원 추가 '+'
+        - 소단원 제거 '-' : 하위 단원도 함께 제거
+        - 저장 버튼 'SAVE'
+
+- 개념 및 예제 코드  
+    <img src="images/20260402_editPage_code_ver1.png" alt="예제 코드 수정 페이지 사진" style="height:250px; widht:auto;">
+    - 단원 
+        - 단원 입력 혹은 선택창
+            > 단원을 직접 입력 혹은 저장된 데이터에서 선택 할 수 있음.
+        - 소단원 추가 '+'
+        - 소단원 제거 '-'
+    - 개념
+    - 예제 번호 
+    - 예제 제목
+    - 코드 입력창
+    - 코드 변환 버튼 '↻': html raw 코드가 그대로 보이도록 변환
+        - &lt; → \&lt;
+        - &gt; → \&gt;
+        - \\n → \<br\>
+        - 공백(' ') → \&nbsp;
+    - 코드 실행: 작성한 코드가 웹페이지에서 어떻게 보이는지 보여줌.
+    - 저장 버튼 'SAVE'
+- 퀴즈  
+    <img src="images/20260402_editPage_quizObjective_ver1.png" alt="예제 코드 수정 페이지 사진" style="height:250px; widht:auto;">
+    <img src="images/20260402_editPage_quizSubjective_ver1.png" alt="예제 코드 수정 페이지 사진" style="height:250px; widht:auto;">
+    - 퀴즈 타입 선택 radio 버튼
+        > 현재 선택된 radio 버튼과 다른 radio 버튼 클릭 시, 퀴즈 수정창 변경 및 입력창(input 박스, textarea 등) 비움.
+        - 객관식
+        - 주관식
+    - 문제
+        - 사진 업로드
+            - 사진 삭제
+            - 사진 미리보기
+            - 사진 크기 변경
+                > 업로드된 사진이 있어야 보임  
+                > 원본 사진 비율 유지
+            ![사진 미리보기 창 구성](images/20260403_editPage_QuizImage.png)
+    - 퀴즈 문제 입력
+    - 보기 입력
+        - 기본: 1 ~ 4번
+        - 선택지 추가: 5번
+    - 정답
+        - 보기: 1 ~ 5번
+        - 사진
+        - 풀이
 

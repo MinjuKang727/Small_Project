@@ -17,13 +17,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    <!-- jstree -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js" integrity="sha512-Rzhxh2sskKwa+96nRopp/hvGexBzEPG6mnFI6uRy059FZfksJJFYmqDFn050KUDhivXLsT6SvoaEf5iSp2SHjg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        // GITHUB 관련 변수
-        let username = 'MinjuKang727';
-        let repo = 'SmallProject';
-        let path = 'PracticeHTML5/data/data.json';
-        let GITHUB_URL = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
-        let jsonData; // JSON 데이터 저장 변수
 
         let myCodeMirror; // CodeMirror 인스턴스를 전역 변수로 선언
 
@@ -62,39 +58,80 @@
 
             // 퀴즈 유형 선택
             $("input[name=quiz_type]").change(function() {
+                let parent = $("#type_quiz");
+                clearFileInput("quiz_img_dir");
+                clearFileInput("answer_img_dir");
+                parent.find('input[type=text], textarea').val("");
+
                 if ($(this).val() === "objective") {
                     $("#options").show();
                     $("#answer_options").show();
                 } else {
+                    parent.find('input[name=answer], input[name=add_option]').prop("checked", false);
+                    let lastOptionInput = $(".last_option_input");
+                    lastOptionInput.hide();
+                    lastOptionInput.prev('span').show();
                     $("#options").hide();
                     $("#answer_options").hide();
                 }
+
+                $(".type_quiz").children('textarea').each(function() {
+                    $(this).val("");
+
+                });
             });
 
             // 퀴즈 이미지 추가
-            $("#img_upload").change(function(event) {
-                console.log("이미지 파일이 선택되었습니다.");
-                const file = event.target.files[0];
+            $("input[type='file']").change(function(event) {
+                let file = event.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        // 이미지 미리보기
-                        $("#uploaded_img").attr("src", e.target.result).show();
-                        $(".image").css("height", "250px");
+                        let imgElement = $(event.target).parent('.img_input').next("img");
+                        imgElement.attr("src", e.target.result).show();
+                        $(event.target).parent('.img_input').parent('.image').css("height", "250px");
                     }
                     reader.readAsDataURL(file);  // 파일 데이터를 읽어 base64로 변환
                 }
             });
 
+            // 업로드된 이미지 크기 정보 가져오기
+            $("img").on("load", function() {
+                let imgLengthElement = $(this).siblings('.img_input').children(".img_length");
+                let imgWidth = $(this).width();
+                let imgHeight = $(this).height();
+
+                imgLengthElement.find(".width").val(imgWidth);
+                imgLengthElement.find(".height").val(imgHeight);
+                imgLengthElement.find("#img_ratio").val(imgWidth / imgHeight);
+                imgLengthElement.show();
+            });
+
+            // 이미지 크기 수정
+            $(".img_length_input").on('propertychange change keyup paste input', function(e) {
+                let imgRatio = $(this).siblings("#img_ratio").val();
+                let settedLength = $(this).val();
+
+                if ($(this).hasClass("width")) {
+                    let newHeight = settedLength / imgRatio;
+                    $(this).siblings(".height").val(newHeight);
+                } else {
+                    let newWidth = settedLength * imgRatio;
+                    $(this).siblings(".width").val(newWidth);
+                }
+            })
+
             // 퀴즈 선택지 추가
             $("input[name=add_option]").change(function() {
+                let lastOptionInput = $(".last_option_input");
                 if ($(this).is(":checked")) {
-                    $(".last_option_input").css("display", "flex");
-                    $(".last_option_input").css("flex-direction", "row");
-                    $(".last_option_input").prev('span').hide();
+                    lastOptionInput.css("display", "flex");
+                    lastOptionInput.css("flex-direction", "row");
+                    lastOptionInput.prev('span').hide();
                 } else {
-                    $(".last_option_input").hide();
-                    $(".last_option_input").prev('span').show();
+                    lastOptionInput.children('input[type=text]').val("");
+                    lastOptionInput.hide();
+                    lastOptionInput.prev('span').show();
                 }
             });
             
@@ -110,7 +147,7 @@
             //             console.log('데이터가 존재합니다.', data);
             //             jsonData = data;
                         
-            //             // 챕터 목록 리스트 정리 쿼리 작성하기
+            //             // 단원 목록 리스트 정리 쿼리 작성하기
 
             //         } else {
             //             console.log('데이터가 비어있습니다.');
@@ -148,22 +185,29 @@
 
 
         // 목차 수정 관련
-        // 챕터 추가
+        // 단원 추가
         let chapterNum = 1;
         function addChapter(i) {
-            let chapter = `<div class="chapter_group" id="chapter_group${chapterNum}">
-                    <input type="text" class="chapter_title" name="chapter" placeholder="챕터 제목">
-                    <button class="btn orange small square" title="챕터 위로 옮기기" onclick="moveUpChapter(${chapterNum})">↑</button>
-                    <button class="btn orange small square" title="챕터 아래로 옮기기" onclick="moveDownChapter(${chapterNum})">↓</button>
+            let chapter = 
+            `<li id="chapterList_${chapterNum}">
+                <div class="chapter_group">
+                    <input type="text" class="chapter_title" name="chapter" placeholder="제목">
+                    <input type="text" class="chapter_page" name="chapter_page" placeholder="페이지">
+                    <button class="btn orange small square" title="단원 위로 옮기기" onclick="moveUpChapter(${chapterNum})">↑</button>
+                    <button class="btn orange small square" title="단원 아래로 옮기기" onclick="moveDownChapter(${chapterNum})">↓</button>
                     <button class="btn blue small square" title="소제목 추가" onclick="addChapter(${chapterNum})">+</button>
-                    <button class="btn red small square" title="챕터 제거" onclick="deleteChapter(${chapterNum})">-</button>
-                </div>`;
+                    <button class="btn red small square" title="단원 제거" onclick="deleteChapter(${chapterNum})">-</button>
+                </div>
+            </li>`;
 
             if (i === undefined) {
-                $("#type_category").append(chapter);
+                $("#chapterUL_0").append(chapter);
             } else {
-                $(`#chapter_group${i}`).append(chapter);
-                $(`#chapter_group${chapterNum}`).css("margin-left", "20px");
+                if ($(`#chapterList_${i}`).children("ul").length === 0) {
+                    $(`#chapterList_${i}`).append(`<ul id="chapterUL_${chapterNum}">${chapter}</ul>`);
+                } else {
+                    $(`#chapterList_${i}`).children("ul").append(chapter);
+                }
             }
 
             chapterNum++;
@@ -171,28 +215,39 @@
         }
 
         function deleteChapter(i) {
-            $(`#chapter_group${i}`).remove();
+            let liElement = $(`#chapterList_${i}`);
+            if ($(`#chapterUL_${i}`).children("li").length === 1) {
+               $(`#chapterUL_${i}`).remove();
+            } else {
+                liElement.remove();
+            }
+            
             chapterNum--;
         }
 
         function moveUpChapter(i) {
-            if ($(`#chapter_group${i}`).is(":first-child")) {
+            let liElement = $(`#chapterList_${i}`);
+            if (liElement.is(":first-child")) {
                 return;
             }
 
-            $(`#chapter_group${i}`).insertBefore($(`#chapter_group${i}`).prev(".chapter_group"));
+            liElement.insertBefore(liElement.prev("li"));
         }
 
         function moveDownChapter(i) {
-            if ($(`#chapter_group${i}`).is(":last-child")) {
+            let liElement = $(`#chapterList_${i}`);
+            if (liElement.is(":last-child")) {
                 return;
             }
 
-            $(`#chapter_group${i}`).insertAfter($(`#chapter_group${i}`).next(".chapter_group"));
+            liElement.insertAfter(liElement.next("li"));
         }
 
 
         // 예제 코드 수정 관련
+
+        let maxSubTitleCnt = 3;
+
         // 소제목 추가
         let subTitleCnt = 1;
         function addSubTitle() {
@@ -206,9 +261,9 @@
             if (subTitleCnt == 1) {
                 $("#delete_input").show();
                 $("#main_title").after(subtitle);
-            } else if(subTitleCnt == 2) {
+            } else if(subTitleCnt < maxSubTitleCnt) {
                 $("#delete_input").before(subtitle);
-            } else if (subTitleCnt == 3) {
+            } else if (subTitleCnt == maxSubTitleCnt) {
                 $("#add_input").hide();
                 $("#delete_input").before(subtitle);
             }
@@ -224,7 +279,7 @@
 
             if (subTitleCnt == 1) {
                 $("#delete_input").hide();
-            } else if (subTitleCnt == 3) {
+            } else if (subTitleCnt == maxSubTitleCnt) {
                 $("#add_input").show();
             }
         }
@@ -266,100 +321,86 @@
 
         // 퀴즈 수정 관련
 
-        function clearFileInput() {
-            $("#img_upload").val("");
-            $("#uploaded_img").attr("src", "").hide();
-            $(".image").css("height", "35px");
+        // 이미지 파일 제거
+        function clearFileInput(inputName) {
+            let fileInput = $(`input[name=${inputName}]`);
+            fileInput.val("");
+            fileInput.parent().next("img").attr("src", "").hide();
+            fileInput.parent().parent().css("height", "35px");
+            fileInput.siblings('.img_length').hide();
+        }
+
+        // 이미지 크기 변경
+        function resizeImage(id, width, height) {
+            console.log("resizeImage called with width:", width, "height:", height);
+            let imgElement = $(`${id}`).parent().parent().next("img");
+            imgElement.css({
+                width: width + "px",
+                height: height + "px"
+            });
         }
         
 
-        // function saveContent() {
-        //     const chapter_li = $(".chapter input").map(function() {
-        //                                                 return $(this).val().trim();
-        //                                             }).get();
-        //     const concept = $(".input_desc").val().trim();
-        //     const exampleNum = $(".input_ex_num").val().trim();
-        //     const exampleTitle = $(".input_ex_title").val().trim();
-        //     const exampleCode = myCodeMirror.getValue().trim();
+        // 데이터 관련
+        // JSON 데이터로 변환
+        function convertToJSON() {
+            let thisType = $("input[name=edit_type]:checked").val();
 
-        //     var idx = 0;
-        //     var chpTitle = chapter_li[idx++];
-        //     var contentLen = 
+            if (thisType === "category") {
+                let data = [];
+                $("#type_category").find("ul").each(function() {
+                    let parentId = parseInt($(this).attr("id").split("_")[1]);
 
-        //     for (var content in jsonData['contents']) {
-        //         if (content['chapter'] === chapter[0]) {
-        //             for (var subcontent in content['contents']) {
-        //                 if (subcontent['subchapter'] === subtitle1) {
-        //                     for (var subcontent2 in subcontent['contents']) {
-        //                         if (subcontent2['subchapter'] === subtitle2) {
-        //                             subcontent2['examples'].push({
-        //                                 concept: concept,
-        //                                 exampleNum: exampleNum,
-        //                                 exampleTitle: exampleTitle,
-        //                                 exampleCode: exampleCode
-        //                             });
-        //                             return; // 함수 종료
-        //                         }
-        //                     }
-        //                     subcontent['examples'].push({
-        //                         concept: concept,
-        //                         exampleNum: exampleNum,
-        //                         exampleTitle: exampleTitle,
-        //                         exampleCode: exampleCode
-        //                     });
-        //                     return; // 함수 종료
-        //                 }
-        //             }
+                    $(this).children("li").each(function() {
+                        let thisId = parseInt($(this).attr("id").split("_")[1]) - 1;
+                        let thisNth = $(this).index();
+                        let thisTitle = $(this).children("div").children(".chapter_title").val();
+                        let thisPage = $(this).children("div").children(".chapter_page").val();
+                        let thisJson = {"id":thisId, "parentId": parentId, "nthChild": thisNth, "name": thisTitle, "page": thisPage};
+                        data.push(thisJson);
+                    });
+                    
+                    // 단원 제목과 페이지 정보 저장 로직 작성
+                });
+                return JSON.stringify(data);
+                // 목차 데이터 변환 로직 작성
+            } else if (thisType === "code") {
+                // 예제 코드 데이터 변환 로직 작성
+            } else if (thisType === "quiz") {
+                // 퀴즈 데이터 변환 로직 작성
+            }
+        };
 
-        //             content['subtitle1'] = subtitle1;
-        //             content['subtitle2'] = subtitle2;
-        //             content['examples'].push({
-        //                 concept: concept,
-        //                 exampleNum: exampleNum,
-        //                 exampleTitle: exampleTitle,
-        //                 exampleCode: exampleCode
-        //             });
-        //             return; // 함수 종료
-        //         }
-        //     }
-        //     if (!(chapterTitle in jsonData['contents'])) {
-        //         jsonData['chapterTitle'] = chapterTitle;
-        //     }
-        //     const contentData = JSON.stringify({
-        //         "chapter": chapterTitle,
-        //         subtitle1: subtitle1,
-        //         subtitle2: subtitle2,
-        //         examples: [
-        //             {
-        //                 concept: concept,
-        //                 exampleNum: exampleNum,
-        //                 exampleTitle: exampleTitle,
-        //                 exampleCode: exampleCode
-        //             }
-        //         ],
-        //         questions: []
-        //     });
-        //     const encodedContent = btoa(unescape(encodeURIComponent(contentData)));
+        // GITHUB 관련 변수
+        let username = 'MinjuKang727';
+        let repo = 'Small_Project';
+        let path = 'PracticeHTML5/data/data.json';
+        let GITHUB_URL = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
+        let config = { ACCESS_TOKEN: '__ACCESS_TOKEN__' };
 
-        //     // JSON 파일로 저장 (예시에서는 콘솔에 출력)
-        //     console.log(contentData);
+        // JSON 데이터 저장 (GitHub API 사용)
+        function saveContent() {
+            let jsonData = convertToJSON();  // JSON 데이터 저장 변수
+            let payload = {
+                message: "UPDATE 'practiceHTML5' JSON 데이터",
+                content: btoa(jsonData), // 데이터는 Base64로 인코딩
+                branch: "main" // 저장할 브랜치
+            };
 
-            // $.ajax({
-            //     url: GITHUB_URL,
-            //     type: 'PUT',
-            //     headers: {
-            //         'Authorization': `token ${GITHUB_ACCESS_TOKEN}`
-            //     },
-            //     data: JSON.stringify({
-            //         message: 'Commit message from jQuery',
-            //         content: btoa(JSON.stringify({key: 'value'})), // 데이터는 Base64로 인코딩
-            //         sha: '기존파일SHA' // 수정 시 필수
-            //     }),
-            //     success: function(response) {
-            //         console.log('Saved!', response);
-            //     }
-            // });
-        // }
+            $.ajax({
+                url: GITHUB_URL,
+                type: 'PUT',
+                headers: {
+                    'Authorization': `token ${config.ACCESS_TOKEN}`
+                },
+                data: JSON.stringify(payload),
+                success: function(response) {
+                    console.log('Saved!', response);
+                }
+            });
+        }
+
+    
     </script>
     <style>
         .title {
@@ -372,7 +413,7 @@
             width: 95%;
             height: 100%;
             gap: 20px;
-            margin: 20px auto;
+            margin-top: 20px;
         }
         .desc {
             width: 100%;
@@ -398,6 +439,14 @@
             padding: 5px 10px;
             border-radius: 5px;
             margin-bottom: 10px;
+        }
+        
+        #type_category .chapter_title{
+            width: 200px;
+        }
+
+        .chapter_page {
+            width: 50px;
         }
 
         #add_input {
@@ -443,11 +492,13 @@
             color: rgb(0, 133, 250);
         }
         #example_code {
+            width: 100%;
             background-color: rgb(236, 247, 255);
             padding: 10px;
             border-radius: 3px;
             border: 1px solid rgb(43, 142, 255);
             margin-top: 10px;
+            margin-right: 10px;
         }
         .practice {
             width: 70%;
@@ -565,22 +616,36 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            border: 1px solid rgb(32, 132, 255);
         }
 
-        .file_input {
+        .img_input {
             display: flex;
             flex-direction: row;
             gap: 10px;
             padding: 5px 10px;
         }
     
-        #uploaded_img {
+        .image img {
             max-height: 80%;
             width: auto;
             object-fit: contain;
             margin: 10px 0;
             display: none;
+        }
+
+        .img_length {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 5px;
+            display: none;
+            background-color: rgb(228, 234, 238);
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .img_length_input {
+            width: 60px;
         }
         
         #options {
@@ -622,7 +687,10 @@
     <div class="content">
         <div class="desc">
             <div id="type_category">
-                <span>챕터 추가</span><button class="btn blue small square" id="add_chapter" title="챕터 추가" onclick="addChapter()">+</button>
+                <span>단원 추가</span><button class="btn blue small square" id="add_chapter" title="단원 추가" onclick="addChapter()">+</button>
+                <ul id="chapterUL_0">
+                    <!-- 단원 목록이 추가될 영역 -->
+                </ul>
             </div>
 
             <div id="type_code">
@@ -631,7 +699,7 @@
                         <select class="chapter_title" id="chapter_title" name="chapter_title">
                             <option value="" selected>직접 입력</option>
                         </select>
-                        <input type="text" class="chapter_title" name="chapter_title" placeholder="챕터 제목">
+                        <input type="text" class="chapter_title" name="chapter_title" placeholder="단원 제목">
                     </div>
                     <button class="btn red small square" id="delete_input" onclick="deleteSubTitle()" title="최하위 부제목 제거">-</button>
                     <button class="btn blue small square" id="add_input" onclick="addSubTitle()" title="소제목 추가">+</button>
@@ -662,12 +730,20 @@
                     <input type="radio" name="quiz_type" value="subjective"/><span> 주관식</span>
                 </div>
                 <div class="image">
-                    <div class="file_input">
+                    <div class="img_input">
                         <span>이미지 삽입: </span>
-                        <input type="file" name="img_dir" id="img_upload" accept="image/*"/>
-                        <button class="btn red small square" id="delete_img" title="이미지 제거" onclick="clearFileInput()">X</button>
+                        <input type="file" name="quiz_img_dir" accept="image/*"/>
+                        <button class="btn red small square" title="이미지 제거" onclick="clearFileInput('quiz_img_dir')">X</button>
+                        <div class="img_length">
+                                <span>이미지 크기: </span>
+                                <input type="text" class="img_length_input width" name="ans_img_w" placeholder="너비">
+                                <span>x</span>
+                                <input type="text" class="img_length_input height" name="ans_img_h" placeholder="높이">
+                                <input type="text" id="img_ratio" name="img_ratio" hidden/>
+                                <button class="btn green small square" id="resize_quiz_image" title="이미지 크기 변경" onclick="resizeImage('#resize_quiz_image', $(this).siblings('.width').val(), $(this).siblings('.height').val())">✔</button>
+                            </div>
                     </div>
-                    <img src="" id="uploaded_img" alt="퀴즈 사진">
+                    <img src="" alt="퀴즈 사진">
                 </div>
                 
                 <textarea id="question" placeholder="퀴즈 입력"></textarea>
@@ -692,6 +768,22 @@
                         <input type="radio" name="answer" value="3"/><span>③</span>
                         <input type="radio" name="answer" value="4"/><span>④</span>
                         <input type="radio" name="answer" value="5"/><span>⑤</span>
+                    </div>
+                    <div class="image">
+                        <div class="img_input">
+                            <span>이미지 삽입: </span>
+                            <input type="file" name="answer_img_dir" accept="image/*"/>
+                            <button class="btn red small square" title="이미지 제거" onclick="clearFileInput('answer_img_dir')">X</button>
+                            <div class="img_length">
+                                <span>이미지 크기: </span>
+                                <input type="text" class="img_length_input width" name="ans_img_w" placeholder="너비">
+                                <span>x</span>
+                                <input type="text" class="img_length_input height" name="ans_img_h" placeholder="높이">
+                                <input type="text" id="img_ratio" name="img_ratio" hidden/>
+                                <button class="btn green small square" id="resize_answer_image" title="이미지 크기 변경" onclick="resizeImage('#resize_answer_image',$(this).siblings('.width').val(), $(this).siblings('.height').val())">✔</button>
+                            </div>
+                        </div>
+                        <img src="" alt="퀴즈 풀이 사진">
                     </div>
                     <textarea id="quiz_solution" placeholder="풀이 입력"></textarea>
                 </div>
