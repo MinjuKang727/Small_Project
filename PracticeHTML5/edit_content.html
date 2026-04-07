@@ -36,11 +36,13 @@
                 tabSize :  4 , // 탭 크기 설정
             } ) ;
 
+
             // 수정 유형 선택
             $("input[name=edit_type]").change(function() {
                 let selectedType = $(this).val();
 
                 if (selectedType === "category") {
+                    getContent();
                     $("#type_category").show();
                     $("#type_code").hide();
                     $("#type_quiz").hide();
@@ -342,24 +344,39 @@
         
 
         // 데이터 관련
+        // id 재할당
+        function setChapterId(){
+            let idCounter = 0;
+            $("#type_category").children("ul").each(function() {
+
+            });
+        };
+
+
         // JSON 데이터로 변환
         function convertToJSON() {
+            setChapterId();
             let thisType = $("input[name=edit_type]:checked").val();
-
+            let idMap = {};
             if (thisType === "category") {
                 let data = [];
                 let idCounter = 0; // 고유 ID를 위한 카운터
                 $("#type_category").find("ul").each(function() {
                     // let parentId = parseInt($(this).attr("id").split("_")[1]);
-                    let parentId = idCounter++;
+                    let parentId = idCounter;
+                    idMap[$(this).attr("id").split("_")[1]] = parentId;
 
                     $(this).children("li").each(function() {
                         // let thisId = parseInt($(this).attr("id").split("_")[1]) - 1;
+                        let thisParentId = $(this).parent("ul").attr("id").split("_")[1];
+                        if (idMap.hasOwnProperty(thisParentId)) {
+                            thisParentId = idMap[thisParentId];
+                        }
                         let thisId = idCounter++;
                         let thisNth = $(this).index();
                         let thisTitle = $(this).children("div").children(".chapter_title").val();
                         let thisPage = $(this).children("div").children(".chapter_page").val();
-                        let thisJson = {"id":thisId, "parentId": parentId, "nthChild": thisNth, "name": thisTitle, "page": thisPage};
+                        let thisJson = {"id":thisId, "parentId": thisParentId, "nthChild": thisNth, "name": thisTitle, "page": thisPage};
                         data.push(thisJson);
                     });
                     
@@ -377,54 +394,108 @@
         // GITHUB 관련 변수
         let username = 'MinjuKang727';
         let repo = 'Small_Project';
-        let path = 'PracticeHTML5/data/data.json';
+        let projectName = 'PracticeHTML5';
+        let branch = 'main';
+        let path = `${projectName}/data/data.json`;
         let GITHUB_URL = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
-        let config = { ACCESS_TOKEN: '__ACCESS_TOKEN__' };
+        let GITHUB_GET_URL = `https://raw.githubusercontent.com/${username}/${repo}/main/${path}`;
+        let GITHUB_GET_SHA_URL = `https://github.com/repos/${username}/${repo}/commits/${branch}`;
+        let SHA = '';
 
         // JSON 데이터 저장 (GitHub API 사용)
         function saveContent() {
+            //최신 커밋 SHA 가져오기
+            $.ajax({
+                url: GITHUB_GET_SHA_URL,
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/vnd.github+json',
+                },
+                success: function(response) {
+                    console.log('GET SHA!', response);
+                    SHA = response.sha;
+                },
+                error: function(xhr, status, error) {
+                    console.log("error:", error);
+                }
+            });
+
+            // console.log("ACCESS_TOKEN:", config.ACCESS_TOKEN);
             jsonData = convertToJSON();  // JSON 데이터 저장 변수
             let payload = {
                 message: "UPDATE 'practiceHTML5' JSON 데이터",
                 content: window.btoa(unescape(encodeURIComponent( jsonData ))), // 데이터는 Base64로 인코딩
-                branch: "main" // 저장할 브랜치
+                branch: branch, // 저장할 브랜치
+                sha: SHA // 업데이트할 파일의 SHA (파일이 이미 존재하는 경우 필요)
             };
 
             $.ajax({
                 url: GITHUB_URL,
-                type: 'PUT',
+                method: 'PUT',
+                contentType: 'application/json',
                 headers: {
-                    'Authorization': `token ${config.ACCESS_TOKEN}`
+                    'Authorization': 'token ${{secrets.ACCESS_TOKEN}}'
                 },
                 data: JSON.stringify(payload),
                 success: function(response) {
                     console.log('Saved!', response);
+                },
+                error: function(e) {
+                    console.log("error:", e);
                 }
             });
         }
 
         function getContent() {
             $.ajax({
-                url: GITHUB_URL,
-                type: 'GET',
+                url: GITHUB_GET_URL,
+                method: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    console.log('success');
+                    // console.log('success');
                     if (data && data.length > 0) {
-                        console.log('데이터가 존재합니다.', data);
-                        jsonData = data;
-                        
-                        // 단원 목록 리스트 정리 쿼리 작성하기
+                        // console.log('데이터가 존재합니다.', data);
+                        if (data && data.length > 0) {
+                            // console.log('데이터가 존재합니다.', data);
+                            // 단원 목록 리스트 정리 쿼리 작성하기
+                            data.sort((a, b) => a.id - b.id); // ID 기준으로 정렬
+                            data.forEach(item => {
+                                // console.log("item:", item.id, item.parentId, item.name, item.page);
+                                if (item.parentId != 0 && $(`#chapterList_${item.parentId}`).length === 0) {
+                                        item.parentId--;
+                                        // console.log("parentId: ", item.parentId);
+                                    }
 
-                    } else {
-                        console.log('데이터가 비어있습니다.');
+                                if ($(`#chapterUL_${item.parentId}`).length === 0) {
+                                    
+                                    $(`#chapterList_${item.parentId}`).append(`<ul id="chapterUL_${item.parentId}"></ul>`);
+                                    // console.log($(`#chapterList_${item.parentId}`).html());
+                                }
+                                
+                                let chapter = 
+                                `<li id="chapterList_${item.id}">
+                                    <div class="chapter_group">
+                                        <input type="text" class="chapter_title" name="chapter" value="${item.name}" placeholder="제목">
+                                        <input type="text" class="chapter_page" name="chapter_page" value="${item.page}" placeholder="페이지">
+                                        <button class="btn orange small square" title="단원 위로 옮기기" onclick="moveUpChapter(${item.id})">↑</button>
+                                        <button class="btn orange small square" title="단원 아래로 옮기기" onclick="moveDownChapter(${item.id})">↓</button>
+                                        <button class="btn blue small square" title="소제목 추가" onclick="addChapter(${item.id})">+</button>
+                                        <button class="btn red small square" title="단원 제거" onclick="deleteChapter(${item.id})">-</button>
+                                    </div>
+                                </li>`
+                                $(`#chapterUL_${item.parentId}`).append(chapter);
+                                // console.log($(`#chapterList_${item.parentId}`).html());
+                            });
+                        }
                     }
+
+                    // console.log('데이터가 비어있습니다.');
                 },
                 error: function(xhr, status, error) {
                     if (xhr.status === 404) {
-                        console.log("404 오류: json 파일이 존재하지 않습니다. 새 파일을 생성합니다.");
+                        // console.log("404 오류: json 파일이 존재하지 않습니다. 새 파일을 생성합니다.");
                     } else {
-                        console.error("기타 오류 발생:", status, error);
+                        // console.error("기타 오류 발생:", status, error);
                     }
                 }
             });
