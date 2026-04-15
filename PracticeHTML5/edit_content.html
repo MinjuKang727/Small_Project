@@ -343,6 +343,7 @@
         }
         
 
+        // https://minjukang727.github.io/Small_Project/PracticeHTML5/edit_content.html
         // 데이터 관련
         // id 재할당
         function setChapterId(){
@@ -406,13 +407,10 @@
         function saveContent() {
             //최신 커밋 SHA 가져오기
             $.ajax({
-                url: GITHUB_GET_SHA_URL,
+                url: GITHUB_URL,
                 method: 'GET',
-                headers: {
-                    'Accept': 'application/vnd.github+json',
-                },
+                contentType: 'application/json',
                 success: function(response) {
-                    console.log('GET SHA!', response);
                     SHA = response.sha;
                 },
                 error: function(xhr, status, error) {
